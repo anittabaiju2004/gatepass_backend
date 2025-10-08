@@ -1,0 +1,140 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: url("{% static 'images/c8.jpg' %}") no-repeat center center/cover;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 0;
+    }
+
+    .glass-box {
+      position: relative;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      border-radius: 20px;
+      padding: 30px;
+      width: 350px;
+      text-align: center;
+      color: #fff;
+    }
+
+    .glass-box h2 {
+      margin-bottom: 20px;
+    }
+
+    .glass-box input,
+    .glass-box select {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.2);
+      color: #1c1b1b;
+    }
+
+    .glass-box input::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .glass-box button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 15px;
+      border: none;
+      border-radius: 10px;
+      background: #ff4081;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .glass-box button:hover {
+      background: #e91e63;
+      transform: translateY(-2px);
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="glass-box">
+    <h2>Login</h2>
+    <form method="post">
+      {% csrf_token %}
+      <select name="role" required onchange="toggleFields(this.value)">
+        <option value="">-- Select Role --</option>
+        <option value="admin">Admin</option>
+        <option value="hod">HOD</option>
+      </select>
+      <div id="admin-fields" style="display:none;">
+        <input type="email" name="admin_email" placeholder="Admin Email">
+        <input type="password" name="password" placeholder="Password">
+      </div>
+
+      <div id="hod-fields" style="display:none;">
+        <input type="email" name="hod_email" placeholder="HOD Email">
+        <input type="text" name="hod_id" placeholder="HOD ID">
+      </div>
+
+      <button type="submit">Login</button>
+    </form>
+    <!-- {% if messages %}
+    <div>
+      {% for message in messages %}
+      <p style="color:yellow;">{{ message }}</p>
+      {% endfor %}
+    </div> -->
+    <!-- {% endif %} -->
+  </div>
+  <script>
+    function toggleFields(role) {
+      // Hide all fields
+      document.getElementById("admin-fields").style.display = (role === "admin") ? "block" : "none";
+      document.getElementById("hod-fields").style.display = (role === "hod") ? "block" : "none";
+
+      // Remove required from all
+      document.querySelectorAll("#admin-fields input, #hod-fields input").forEach(input => input.required = false);
+
+      // Add required only to visible fields
+      if (role === "admin") {
+        document.querySelectorAll("#admin-fields input").forEach(input => input.required = true);
+        document.querySelectorAll("#admin-fields input").forEach(input => input.value = "");
+      }
+      if (role === "hod") {
+        document.querySelectorAll("#hod-fields input").forEach(input => input.required = true);
+        document.querySelectorAll("#hod-fields input").forEach(input => input.value = "");
+      }
+    }
+    // On page load, show fields if a role is already selected
+    window.onload = function () {
+      var roleSelect = document.querySelector('select[name="role"]');
+      toggleFields(roleSelect.value);
+    };
+  </script>
+</body>
+
+</html>
