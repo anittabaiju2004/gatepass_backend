@@ -766,6 +766,8 @@ def hod_view_jobs(request):
         "companies": companies,
     }
     return render(request, "hodapp/hod_view_jobs.html", context)
+
+
 from gatepassapp.models import JobApplication
 # views.py
 from django.shortcuts import render

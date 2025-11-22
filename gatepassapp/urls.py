@@ -74,4 +74,18 @@ urlpatterns = [
    path('tutor/companies/', TutorviewCompaniesView.as_view(), name='tutor_view_companies'),
    #url for tutor view jobs by company
    path('tutor/companies/<int:company_id>/jobs/', TutorViewJobsByCompanyView.as_view(), name='tutor_view_jobs_by_company'),
+
+
+
+
+
+
+
+
+
+
+
+
+
+   path('student/<int:pk>/', StudentDetailView.as_view(), name='view_student'),
 ]

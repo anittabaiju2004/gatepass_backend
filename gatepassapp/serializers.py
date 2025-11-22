@@ -44,13 +44,31 @@ class TutorSerializer(serializers.ModelSerializer):
 
 #serializer for student
 class StudentSerializer(serializers.ModelSerializer):
+    tutor_name = serializers.CharField(source='tutor.name', read_only=True)
+    hod_name = serializers.CharField(source='hod.name', read_only=True)
+    department_name = serializers.CharField(source='department.name', read_only=True)
+    course_name = serializers.CharField(source='course.name', read_only=True)
+
     class Meta:
         model = tbl_student
-        fields = '__all__'
+        fields = [
+            'id', 'name', 'gender', 'email', 'phone', 'address', 'dob', 'year',
+            'supply', 'batch', 'student_id', 'register_number', 'roll_number',
+            'role', 'image',
+            'tutor', 'hod', 'department', 'course',
+
+            # extra fields
+            'tutor_name', 'hod_name', 'department_name', 'course_name'
+        ]
+
 
 #serializer for student request for a leave
 from rest_framework import serializers
 from .models import StudentRequest
+
+from rest_framework import serializers
+from .models import StudentRequest
+from datetime import datetime
 
 class StudentRequestSerializer(serializers.ModelSerializer):
     student_name = serializers.CharField(source="student.name", read_only=True)
@@ -62,10 +80,26 @@ class StudentRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentRequest
         fields = "__all__"
+
     def to_representation(self, instance):
         rep = super().to_representation(instance)
+
+        # Format request_date -> dd/mm/yyyy
+        if instance.request_date:
+            rep['request_date'] = instance.request_date.strftime("%d/%m/%Y")
+        else:
+            rep['request_date'] = None
+
+        # Format created_at -> dd/mm/yyyy
+        if instance.created_at:
+            rep['created_at'] = instance.created_at.strftime("%d/%m/%Y %H:%M")
+        else:
+            rep['created_at'] = None
+
+        # Add QR code URL if exists
         if instance.qr_code:
             rep['qr_code'] = instance.qr_code.url
+
         return rep
 
 #serializer for student profile and update profile
@@ -116,6 +150,17 @@ class JobSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tbl_Job
         fields = '__all__'
+
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+
+        # Format date -> dd/mm/yyyy
+        if instance.date:
+            rep['date'] = instance.date.strftime("%d/%m/%Y")
+        else:
+            rep['date'] = None
+
+        return rep   # ⭐ You MUST return this!
 
 
 

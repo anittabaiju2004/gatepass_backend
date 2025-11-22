@@ -341,6 +341,9 @@ class StudentRequestViewSet(viewsets.ModelViewSet):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+        
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -704,3 +707,21 @@ class JobDetailView(APIView):
             return Response({"error": "Job not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import tbl_student
+from .serializers import StudentSerializer
+
+class StudentDetailView(APIView):
+    def get(self, request, pk):
+        try:
+            student = tbl_student.objects.get(id=pk)   # <-- primary key lookup
+        except tbl_student.DoesNotExist:
+            return Response({"error": "Student not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = StudentSerializer(student)
+        return Response(serializer.data, status=status.HTTP_200_OK)

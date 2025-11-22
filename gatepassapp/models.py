@@ -49,7 +49,8 @@ class StudentRequest(models.Model):
     hod = models.ForeignKey(tbl_hod, on_delete=models.CASCADE, related_name="student_requests")
     department = models.ForeignKey(tbl_department, on_delete=models.CASCADE)
     course = models.ForeignKey(tbl_course, on_delete=models.CASCADE)
-
+    request_date = models.DateField(null=True, blank=True)
+    request_time = models.TimeField(null=True, blank=True)
     reason = models.TextField()
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
