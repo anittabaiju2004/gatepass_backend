@@ -1,5 +1,16 @@
 from django.db import models
-from django.utils import timezone
+from datetime import datetime, date, time
+
+def get_current_ist_date():
+    return date.today()
+
+def get_current_ist_time():
+    return datetime.now().time()
+
+def get_current_ist_datetime():
+    return datetime.now()
+
+
 #model for student
 class tbl_student(models.Model):
     tutor = models.ForeignKey('adminapp.tbl_tutor', on_delete=models.CASCADE)
@@ -58,7 +69,8 @@ class StudentRequest(models.Model):
     forwarded_to_hod = models.BooleanField(default=False)
     qr_code = models.ImageField(upload_to="qr_codes/", null=True, blank=True)
     is_leaved = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=get_current_ist_datetime)
+
 
     def __str__(self):
         return f"{self.student.name} - {self.reason[:20]} ({self.status})"
@@ -68,8 +80,9 @@ class StudentRequest(models.Model):
 from django.db import models
 class MarkAttendance(models.Model):
     student = models.ForeignKey('tbl_student', on_delete=models.CASCADE)
-    date = models.DateField(auto_now_add=True)
-    time = models.TimeField(auto_now_add=True)
+    date = models.DateField(default=get_current_ist_date)
+    time = models.TimeField(default=get_current_ist_time)
+
     status = models.CharField(
         max_length=15,
         choices=[
@@ -105,7 +118,8 @@ class JobApplication(models.Model):
         choices=STATUS_CHOICES, 
         default='Pending'
     )
-    applied_at = models.DateTimeField(auto_now_add=True)
+    applied_at = models.DateTimeField(default=get_current_ist_datetime)
+
 
     def __str__(self):
         return f"{self.student.name} applied for {self.job.title}"
@@ -115,8 +129,9 @@ class JobApplication(models.Model):
 
 class Attendance(models.Model):
     student = models.ForeignKey(tbl_student, on_delete=models.CASCADE)
-    date = models.DateField(default=timezone.now)
-    time = models.TimeField(auto_now_add=True)
+    date = models.DateField(default=get_current_ist_date)
+    time = models.TimeField(default=get_current_ist_time)
+
 
     class Meta:
         unique_together = ('student', 'date')  # Prevent duplicate attendance per day

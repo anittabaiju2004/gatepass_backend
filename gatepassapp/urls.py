@@ -54,7 +54,7 @@ urlpatterns = [
    #url for view job details by job id
    path('job/<int:job_id>/', JobDetailView.as_view(), name='job-detail'),
    #url for leave requests by student id
-   path('student-requests/<int:student_id>/', StudentRequestsByStudentAPIView.as_view(), name='student-requests-by-student'),
+   path('list-student-requests/<int:student_id>/', StudentRequestsByStudentAPIView.as_view(), name='student-requests-by-student'),
    #url for mark attendance
    path('api/mark-attendance/', AttendanceAPIView.as_view(), name='mark-attendance'),
    #url for tutor to view student requests assigned to them
