@@ -27,6 +27,7 @@ class LoginView(APIView):
                 "email": user.email,
             }
 
+            # Tutor Response
             if role == 'tutor':
                 response_data.update({
                     "tutor_id": user.tutor_id,
@@ -37,8 +38,7 @@ class LoginView(APIView):
                     'roles': user.roles,
                 })
 
-            
-
+            # Student Response
             elif role == 'student':
                 response_data.update({
                     "student_id": user.student_id,
@@ -47,6 +47,17 @@ class LoginView(APIView):
                     "course_id": user.course.id,
                     "course": user.course.name,
                     'role': user.role,
+                })
+
+            # ⭐ Guard Response
+            elif role == 'guard':
+                response_data.update({
+                    "guard_id": user.guard_id,
+                    "gate_location": user.gate_location,
+                    "gender": user.gender,
+                    "phone": user.phone,
+                    "photo": user.photo.url if user.photo else None,
+                    "roles": user.roles,  # always 'guard'
                 })
 
             return Response(response_data, status=status.HTTP_200_OK)
@@ -289,14 +300,159 @@ class TutorViewJobsByCompanyView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import MarkAttendance
+from .serializers import MarkAttendanceSerializer
+from gatepassapp.models import tbl_student
+
+class TutorViewAttendanceAPIView(APIView):
+    """
+    Tutor views attendance of all students assigned to them
+    """
+
+    def get(self, request, tutor_id):
+        # Get all students under the tutor
+        students = tbl_student.objects.filter(tutor_id=tutor_id)
+
+        # Get attendance for these students
+        attendance_records = MarkAttendance.objects.filter(
+            student__in=students
+        ).order_by('-date', '-time')
+
+        serializer = MarkAttendanceSerializer(attendance_records, many=True)
+
+        return Response({
+            "tutor_id": tutor_id,
+            "total_records": attendance_records.count(),
+            "attendance": serializer.data
+        }, status=status.HTTP_200_OK)
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import MarkAttendance
+
+class UpdateAttendanceStatusAPIView(APIView):
+    """
+    Tutor updates attendance status:
+    {
+        "status": "Present"
+    }
+    """
+
+    def patch(self, request, attendance_id):
+        try:
+            attendance = MarkAttendance.objects.get(id=attendance_id)
+        except MarkAttendance.DoesNotExist:
+            return Response(
+                {"error": "Attendance record not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        new_status = request.data.get("status")
+
+        # Validate status
+        allowed_statuses = ["Present", "Absent", "Not Marked"]
+        if new_status not in allowed_statuses:
+            return Response(
+                {"error": "Invalid status. Allowed: Present, Absent, Not Marked"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        attendance.status = new_status
+        attendance.save()
+
+        return Response(
+            {"message": "Attendance status updated successfully", "new_status": new_status},
+            status=status.HTTP_200_OK
+        )
 
 
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.utils.timezone import now
+from .models import MarkAttendance
+from .serializers import MarkAttendanceSerializer
+from gatepassapp.models import tbl_student
+
+class TutorTodayAttendanceAPIView(APIView):
+    """
+    Tutor views today's attendance for all assigned students
+    """
+
+    def get(self, request, tutor_id):
+        today = now().date()
+
+        # Get students under this tutor
+        students = tbl_student.objects.filter(tutor_id=tutor_id)
+
+        # Filter today's attendance
+        attendance_records = MarkAttendance.objects.filter(
+            student__in=students,
+            date=today
+        ).order_by('-time')
+
+        serializer = MarkAttendanceSerializer(attendance_records, many=True)
+
+        return Response({
+            "tutor_id": tutor_id,
+            "date": today.strftime("%d/%m/%Y"),
+            "total_records": attendance_records.count(),
+            "attendance": serializer.data
+        }, status=status.HTTP_200_OK)
 
 
+#today
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import MarkAttendance
 
+class UpdateAttendanceStatusAPIView(APIView):
+    """
+    Update attendance status:
+    {
+        "status": "Present"
+    }
+    """
 
+    def patch(self, request, attendance_id):
+        try:
+            attendance = MarkAttendance.objects.get(id=attendance_id)
+        except MarkAttendance.DoesNotExist:
+            return Response(
+                {"error": "Attendance record not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
+        new_status = request.data.get("status")
+
+        allowed_status = ["Present", "Absent", "Not Marked"]
+
+        # Validate incoming status
+        if new_status not in allowed_status:
+            return Response(
+                {"error": "Invalid status. Allowed: Present, Absent, Not Marked"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Update status
+        attendance.status = new_status
+        attendance.save()
+
+        return Response(
+            {
+                "message": "Attendance status updated successfully",
+                "attendance_id": attendance_id,
+                "new_status": new_status
+            },
+            status=status.HTTP_200_OK
+        )
 
 
 
@@ -551,6 +707,26 @@ class StudentRequestsByStudentAPIView(APIView):
 
 
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import JobApplication
+from .serializers import JobApplicationSerializer
+
+class StudentJobApplicationsAPIView(APIView):
+    """
+    View all job applications submitted by a specific student
+    """
+
+    def get(self, request, student_id, *args, **kwargs):
+        applications = JobApplication.objects.filter(student_id=student_id).order_by("-applied_at")
+
+        serializer = JobApplicationSerializer(applications, many=True)
+
+        return Response({
+            "student_id": student_id,
+            "applications": serializer.data
+        }, status=status.HTTP_200_OK)
 
 
 
@@ -725,3 +901,83 @@ class StudentDetailView(APIView):
 
         serializer = StudentSerializer(student)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+
+
+
+
+
+
+#GUARD PART
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import StudentRequest
+from .serializers import StudentRequestSerializer
+
+class GuardApprovedLeaveRequestsAPIView(APIView):
+    """
+    Guard can view all leave requests approved by HOD.
+    """
+
+    def get(self, request, *args, **kwargs):
+        approved_requests = StudentRequest.objects.filter(
+            status="HOD Approved"
+        ).order_by("-created_at")
+
+        serializer = StudentRequestSerializer(approved_requests, many=True)
+
+        return Response({
+            "count": approved_requests.count(),
+            "approved_leaves": serializer.data
+        }, status=status.HTTP_200_OK)
+    
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import StudentRequest
+class GuardUpdateLeaveStatusAPIView(APIView):
+    """
+    Guard updates leave status using JSON:
+    {
+        "status": "Leaved"
+    }
+    """
+
+    def patch(self, request, request_id):
+        try:
+            leave_request = StudentRequest.objects.get(id=request_id)
+        except StudentRequest.DoesNotExist:
+            return Response(
+                {"error": "Leave request not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        new_status = request.data.get("status")
+
+        # Validate incoming status
+        if new_status not in ["Leaved"]:
+            return Response(
+                {"error": "Invalid status. Only 'Leaved' is allowed for guard."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Only approved requests can be marked as leaved
+        if leave_request.status != "HOD Approved":
+            return Response(
+                {"error": "Only HOD Approved requests can be marked as Leaved"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Perform update
+        leave_request.status = "Leaved"
+        leave_request.is_leaved = True
+        leave_request.save()
+
+        return Response(
+            {"message": "Leave status updated to Leaved successfully"},
+            status=status.HTTP_200_OK
+        )

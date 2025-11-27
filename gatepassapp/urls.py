@@ -31,7 +31,6 @@ urlpatterns = [
    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 
 
-
    #url for login
    path('login/', LoginView.as_view(), name='login'),
    #url for student upload via an excel
@@ -74,18 +73,25 @@ urlpatterns = [
    path('tutor/companies/', TutorviewCompaniesView.as_view(), name='tutor_view_companies'),
    #url for tutor view jobs by company
    path('tutor/companies/<int:company_id>/jobs/', TutorViewJobsByCompanyView.as_view(), name='tutor_view_jobs_by_company'),
+   #student job applications by student id
+   path("student/<int:student_id>/job-applications/", StudentJobApplicationsAPIView.as_view(),name="student-job-applications"),
+   #tutor view attendance of students
+   path("tutor/<int:tutor_id>/attendance/", TutorViewAttendanceAPIView.as_view(), name="tutor_view_attendance"),
+   # attendance update status
+   path("attendance/update/<int:attendance_id>/", UpdateAttendanceStatusAPIView.as_view(), name="update-attendance-status"),
+   #view attendance by today's date
+   path("tutor/<int:tutor_id>/attendance/today/", TutorTodayAttendanceAPIView.as_view(), name="tutor-today-attendance"),
+   # attendance update status today
+   path("attendance/update/<int:attendance_id>/",UpdateAttendanceStatusAPIView.as_view(),name="update-attendance-status"),
 
 
 
+   #guard
+   #guard view approved leave requests
+   path("guard/approved-leaves/", GuardApprovedLeaveRequestsAPIView.as_view(),name="guard-approved-leaves"),
+   #guard update leave status to 'Leaved'
+   path("guard/leave/update/<int:request_id>/", GuardUpdateLeaveStatusAPIView.as_view(),name="guard-update-leave"),
 
-
-
-
-
-
-
-
-
-
+   # view student details
    path('student/<int:pk>/', StudentDetailView.as_view(), name='view_student'),
 ]

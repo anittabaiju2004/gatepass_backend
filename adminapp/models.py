@@ -184,3 +184,21 @@ class tbl_tutor(models.Model):
 
 
 
+
+
+
+class GateGuard(models.Model):
+    guard_id = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=100)
+    gender = models.CharField(
+        max_length=10,
+        choices=[("Male", "Male"), ("Female", "Female"), ("Other", "Other")]
+    )
+    phone = models.CharField(max_length=15)
+    email = models.EmailField()
+    photo = models.ImageField(upload_to='guard_photos/', blank=True, null=True)
+    gate_location = models.CharField(max_length=100)
+    roles = models.CharField(max_length=50, default='guard')
+
+    def __str__(self):
+        return f"{self.guard_id} - {self.name}"

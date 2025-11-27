@@ -42,6 +42,7 @@ class StudentRequest(models.Model):
         ("Tutor Approved", "Tutor Approved"),
         ("HOD Rejected", "HOD Rejected"),
         ("HOD Approved", "HOD Approved"),
+        ("Leaved", "Leaved"),
     ]
 
     student = models.ForeignKey(tbl_student, on_delete=models.CASCADE, related_name="leave_requests")
@@ -94,6 +95,9 @@ class JobApplication(models.Model):
         ('Pending', 'Pending'),
         ('Approved', 'Approved'),
         ('Rejected', 'Rejected'),
+        ('Company Reviewed', 'Company Reviewed'),
+        ('Company Approved', 'Company Approved'),
+        ('Company Rejected', 'Company Rejected'),
     ]
     
     status = models.CharField(

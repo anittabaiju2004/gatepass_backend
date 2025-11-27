@@ -68,6 +68,8 @@
                 <th>Status</th>
                 <th>Applied At</th>
                 <th>Resume</th>
+                
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -84,11 +86,35 @@
                 <td>{{ app.applied_at }}</td>
                 <td>
                     {% if app.resume %}
-                        <a href="{{ app.resume.url }}" target="_blank" class="btn btn-sm btn-primary">View</a>
+                    <a href="{{ app.resume.url }}" target="_blank" class="btn btn-sm btn-primary">View</a>
                     {% else %}
-                        -
+                    -
                     {% endif %}
                 </td>
+                <td>
+                    
+
+                    <!-- Approve Button -->
+                    {% if app.status != "Company Approved" %}
+                    <form method="POST" action="{% url 'update_application_status' app.id %}"
+                        style="display:inline-block;">
+                        {% csrf_token %}
+                        <input type="hidden" name="status" value="Company Approved">
+                        <button class="btn btn-sm btn-success mt-1">Approve</button>
+                    </form>
+                    {% endif %}
+
+                    <!-- Reject Button -->
+                    {% if app.status != "Company Rejected" %}
+                    <form method="POST" action="{% url 'update_application_status' app.id %}"
+                        style="display:inline-block;">
+                        {% csrf_token %}
+                        <input type="hidden" name="status" value="Company Rejected">
+                        <button class="btn btn-sm btn-danger mt-1">Reject</button>
+                    </form>
+                    {% endif %}
+                </td>
+
             </tr>
             {% empty %}
             <tr>

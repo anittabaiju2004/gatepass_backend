@@ -508,9 +508,81 @@ def admin_view_applicants(request):
     }
     return render(request, "adminapp/admin_view_applicants.html", context)
 
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import GateGuard
+
+def manage_guard(request):
+    # CREATE OR UPDATE
+    if request.method == "POST":
+        guard_id = request.POST.get("guard_id")
+        name = request.POST.get("name")
+        gender = request.POST.get("gender")
+        phone = request.POST.get("phone")
+        email = request.POST.get("email")
+        gate_location = request.POST.get("gate_location")
+        photo = request.FILES.get("photo")
+
+        edit_id = request.POST.get("edit_id")  # Hidden field for editing
+
+        if edit_id:  
+            guard = get_object_or_404(GateGuard, id=edit_id)
+        else:
+            guard = GateGuard()
+
+        guard.guard_id = guard_id
+        guard.name = name
+        guard.gender = gender
+        guard.phone = phone
+        guard.email = email
+        guard.gate_location = gate_location
+
+        if photo:
+            guard.photo = photo
+
+        guard.save()
+        return redirect("manage_guard")
+
+    # DELETE
+    delete_id = request.GET.get("delete")
+    if delete_id:
+        GateGuard.objects.filter(id=delete_id).delete()
+        return redirect("manage_guard")
+
+    # EDIT (pre-fill form)
+    edit_data = None
+    edit_id = request.GET.get("edit")
+    if edit_id:
+        edit_data = get_object_or_404(GateGuard, id=edit_id)
+
+    # LIST
+    guards = GateGuard.objects.all()
+
+    return render(request, "adminapp/manage_guard.html", {
+        "guards": guards,
+        "edit_data": edit_data
+    })
 
 
 
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from gatepassapp.models import JobApplication
+
+def update_application_status(request, application_id):
+    if request.method == "POST":
+        new_status = request.POST.get("status")
+
+        allowed_status = ["Company Approved", "Company Rejected"]
+        if new_status not in allowed_status:
+            messages.error(request, "Invalid status")
+            return redirect('admin_view_applicants')
+
+        application = get_object_or_404(JobApplication, id=application_id)
+        application.status = new_status
+        application.save()
+
+        messages.success(request, f"Status updated to {new_status}")
+        return redirect('admin_view_applicants')
 
 
 

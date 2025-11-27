@@ -31,6 +31,10 @@ urlpatterns=[
     path('companies/edit/<int:pk>/', views.edit_company, name='company-edit'),
     path('companies/delete/<int:pk>/', views.delete_company, name='company-delete'),
     path("admin_view_applicants/", views.admin_view_applicants, name="admin_view_applicants"),
+    path("manage-guard/", manage_guard, name="manage_guard"),
+    path("hod/update-application-status/<int:application_id>/",update_application_status,name="update_application_status"),
+
+
 
 
     # HOD URLs

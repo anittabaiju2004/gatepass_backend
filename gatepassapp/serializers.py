@@ -1,16 +1,22 @@
 from rest_framework import serializers
-from adminapp.models import tbl_hod,tbl_tutor
+from adminapp.models import tbl_hod,tbl_tutor,GateGuard
 from .models import tbl_student
 #serializer for login
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
-    login_id = serializers.CharField()  # can be tutor_id / hod_id / student_id
-    role = serializers.ChoiceField(choices=[('hod', 'HOD'), ('tutor', 'Tutor'), ('student', 'Student')])
+    login_id = serializers.CharField()  # tutor_id / hod_id / student_id / guard_id
+    role = serializers.ChoiceField(choices=[
+        ('tutor', 'Tutor'), 
+        ('student', 'Student'),
+        ('guard', 'Guard')
+    ])
 
     def validate(self, data):
         email = data.get('email')
         login_id = data.get('login_id')
         role = data.get('role')
+
+        # Tutor Login
         if role == 'tutor':
             try:
                 tutor = tbl_tutor.objects.get(email=email, tutor_id=login_id)
@@ -18,12 +24,21 @@ class LoginSerializer(serializers.Serializer):
                 raise serializers.ValidationError("Invalid Tutor credentials.")
             data['user'] = tutor
 
+        # Student Login
         elif role == 'student':
             try:
                 student = tbl_student.objects.get(email=email, student_id=login_id)
             except tbl_student.DoesNotExist:
                 raise serializers.ValidationError("Invalid Student credentials.")
             data['user'] = student
+
+        # Guard Login
+        elif role == 'guard':
+            try:
+                guard = GateGuard.objects.get(email=email, guard_id=login_id)
+            except GateGuard.DoesNotExist:
+                raise serializers.ValidationError("Invalid Guard credentials.")
+            data['user'] = guard
 
         data['role'] = role
         return data
