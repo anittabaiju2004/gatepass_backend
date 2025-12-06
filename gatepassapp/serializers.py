@@ -195,13 +195,15 @@ from .models import JobApplication
 class JobApplicationSerializer(serializers.ModelSerializer):
     student_name = serializers.CharField(source='student.name', read_only=True)
     job_title = serializers.CharField(source='job.title', read_only=True)
+    company = serializers.CharField(source='job.company.name', read_only=True)
 
     class Meta:
         model = JobApplication
-        fields = ['id', 'student', 'student_name', 'job', 'job_title', 'resume', 'status', 'applied_at']
-        read_only_fields = ['status', 'applied_at']  # status is controlled by system
+        fields = ['id', 'student', 'student_name', 'job', 'job_title', 'company', 'resume', 'status', 'applied_at']
+        read_only_fields = ['company', 'status', 'applied_at']  # status is controlled by system
     def to_representation(self, instance):
         rep = super().to_representation(instance)
         if instance.resume:
             rep['resume'] = instance.resume.url
         return rep
+        

@@ -67,8 +67,9 @@ urlpatterns = [
    path('tutor/jobs/', TutorViewJobsAPIView.as_view(), name='tutor_view_jobs'),
    #url for tutor view,approve,reject applied students for a job
    path('tutor/<int:tutor_id>/applied-students/', TutorViewAppliedStudentsAPIView.as_view(), name='tutor_view_applied_students'),
-   path('tutor/application/<int:application_id>/approve/', TutorApproveApplicationAPIView.as_view(), name='tutor_approve_application'),
-   path('tutor/application/<int:application_id>/reject/', TutorRejectApplicationAPIView.as_view(), name='tutor_reject_application'),
+   path('tutor/<int:tutor_id>/application/<int:application_id>/approve/',TutorApproveApplicationAPIView.as_view(),name='tutor_approve_application'),
+   path('tutor/<int:tutor_id>/application/<int:application_id>/reject/',TutorRejectApplicationAPIView.as_view(),name='tutor_reject_application'),
+
    #url for tutor view companies
    path('tutor/companies/', TutorviewCompaniesView.as_view(), name='tutor_view_companies'),
    #url for tutor view jobs by company

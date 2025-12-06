@@ -252,33 +252,62 @@ from rest_framework import status
 from .models import JobApplication
 
 class TutorApproveApplicationAPIView(APIView):
-    """
-    Approve a student's job application.
-    """
-    def post(self, request, application_id, *args, **kwargs):
+    def post(self, request, tutor_id, application_id, *args, **kwargs):
+        # Validate tutor
+        try:
+            tutor = tbl_tutor.objects.get(id=tutor_id)
+        except tbl_tutor.DoesNotExist:
+            return Response({"error": "Tutor not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Validate application
         try:
             application = JobApplication.objects.get(id=application_id)
         except JobApplication.DoesNotExist:
             return Response({"error": "Application not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # OPTIONAL: restrict tutor so they can only approve their own students
+        if application.student.tutor.id != tutor.id:
+            return Response(
+                {"error": "Tutor is not assigned to this student"},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
         application.status = "Approved"
         application.save()
-        return Response({"message": "Application approved successfully"}, status=status.HTTP_200_OK)
 
+        return Response(
+            {"message": "Application approved successfully"},
+            status=status.HTTP_200_OK
+        )
 
 class TutorRejectApplicationAPIView(APIView):
-    """
-    Reject a student's job application.
-    """
-    def post(self, request, application_id, *args, **kwargs):
+    def post(self, request, tutor_id, application_id, *args, **kwargs):
+        # Validate tutor
+        try:
+            tutor = tbl_tutor.objects.get(id=tutor_id)
+        except tbl_tutor.DoesNotExist:
+            return Response({"error": "Tutor not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Validate application
         try:
             application = JobApplication.objects.get(id=application_id)
         except JobApplication.DoesNotExist:
             return Response({"error": "Application not found"}, status=status.HTTP_404_NOT_FOUND)
 
+        # OPTIONAL: restrict tutor so they can only reject their own students
+        if application.student.tutor.id != tutor.id:
+            return Response(
+                {"error": "Tutor is not assigned to this student"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
         application.status = "Rejected"
         application.save()
-        return Response({"message": "Application rejected successfully"}, status=status.HTTP_200_OK)
+
+        return Response(
+            {"message": "Application rejected successfully"},
+            status=status.HTTP_200_OK
+        )
 
 
 class TutorviewCompaniesView(APIView):
